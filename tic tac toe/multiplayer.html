@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <title>Tic-Tac-Toe Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 60px;
+            font-weight: bold;
+            color: rgb(19, 19, 19);
+        }
+
+        .turns {
+            font-size: 30px;
+            font-weight: bold;
+            font-family: sans-serif;
+            margin-bottom: 15px;
+        }
+
+        .board {
+            width: 350px;
+            height: 350px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 8px;
+            cursor: pointer;
+        }
+
+        .cell {
+            font-size: 60px;
+            font-family: sans-serif;
+            border-radius: 15px;
+            background-color: rgba(57, 30, 165, 0.456);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cell:hover {
+            background-color: rgb(255, 255, 255);
+            box-shadow: 15px 15px 40px -6px rgba(0, 0, 0, 0.2);
+        }
+
+        .board.x .cell:not(.x):not(.o),
+        .board.o .cell:not(.x):not(.o) {
+            text-indent: -9999px;
+            overflow: hidden;
+        }
+
+        .board.x .cell:not(.x):not(.o):hover,
+        .board.o .cell:not(.x):not(.o):hover {
+            text-indent: 0px;
+            color: rgba(94, 31, 31, 0.3);
+        }
+
+        .finish {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            background: rgba(21, 191, 197, 0.4);
+            display: none;
+        }
+
+        .message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 30px;
+            width: 400px;
+            height: 200px;
+            border-radius: 30px;
+            background-color: rgb(247, 241, 241);
+        }
+
+        .message .text {
+            color: rgb(90, 237, 222);
+            font-family: sans-serif;
+        }
+
+        .message button {
+            color: rgb(0, 0, 0);
+            margin-top: 30px;
+            padding: 10px 12px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .finish button {
+            background-color: rgb(153, 12, 75); /* Play Again */
+            box-shadow: 1px 1px 5px 2px rgba(24, 23, 23, 0.596);
+            border: none;
+        }
+
+        .finish button:active {
+            transform: scale(0.8);
+        }
+
+        .btn {
+            border: 2px solid black;
+            border-radius: 5px;
+            background-color: white;
+            color: black;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Blue */
+        .info {
+            border-color: #ec48a2;
+            color: rgb(255, 30, 158)
+        }
+
+        .info:hover {
+            background: #ff00c3;
+            color: white;
+        }
+
+        #bnt-restart {
+            display: block;
+            padding: 10px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 200px;
+            background: #0d607b;
+            font-size: 1.5em;
+            color: #FFF;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        #bnt-restart:hover {
+            background: #0b485c;
+        }
+        
+        #bnt-restart:active {
+            background: #1c4c5d;
+        }
+        
+        #bnt-restart:disabled {
+            color: #d831cd;
+            background: #CECECE;
+        }
+    </style>
+</head>
+
+<body class="shade" style="background-image: url(bg4.jpg);background-size:cover;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"">
+    <h1><span style="color: rgb(22, 21, 21);">Tic</span> <span style="color: rgb(25, 25, 24);">Tac</span> <span style="color: rgb(15, 15, 16);">Toe</span></h1>
+    <div class="turns x"></div>
+    <div class="board x">
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+        <div class="cell">X</div>
+    </div>
+    <div class="finish">
+        <div class="message">
+            <span class="text"></span>
+            <button id="restart">Play Again</button>
+        </div>
+    </div>
+    <script>
+        var currTurn = "x";
+        var board = document.querySelector(".board");
+        var text = document.querySelector(".text");
+        var turns = document.querySelector(".turns");
+        var cells = document.querySelectorAll(".cell");
+        var restart = document.getElementById("restart");
+
+        const winCombs = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+
+        cells.forEach((element) => {
+            element.addEventListener("click", doThis, { once: true });
+        });
+
+        restart.addEventListener("click", (e) => {
+            location.reload();
+            return false;
+        });
+
+        function doThis(e) {
+            markTheCell(e.target);
+            if (isCurrWinner()) {
+                gameOver(false);
+            } else if (isDraw()) {
+                gameOver(true);
+            } else {
+                changeTurn();
+                changeBoard();
+            }
+        }
+
+        function markTheCell(element) {
+            if (currTurn == "x") {
+                element.innerHTML = "X";
+                element.classList.add("x");
+            } else {
+                element.innerHTML = "O";
+                element.classList.add("o");
+            }
+        }
+
+        function isCurrWinner() {
+            return winCombs.some((currComb) => {
+                return currComb.every((cellIndex) => {
+                    return cells[cellIndex].classList.contains(currTurn);
+                });
+            });
+        }
+
+        function isDraw() {
+            return [...cells].every((cell) => {
+                return cell.classList.contains("x") || cell.classList.contains("o");
+            });
+        }
+
+        function gameOver(draw) {
+            if (draw) {
+                text.innerText = "Draw!";
+            } else {
+                text.innerText = "Player " + currTurn.toUpperCase() + " Wins!";
+            }
+            document.querySelector(".finish").style.display = "flex";
+        }
+
+        function changeTurn() {
+            turns.classList.remove(currTurn);
+            currTurn == "x" ? (currTurn = "o") : (currTurn = "x");
+            turns.classList.add(currTurn);
+            /*turns.innerText =  currTurn.toUpperCase();*/
+        }
+
+        function changeBoard() {
+            cells.forEach((element) => {
+                if (element.classList.length == 1)
+                    element.innerHTML = currTurn.toUpperCase();
+            });
+            currTurn == "x" ? board.classList.remove("o") : board.classList.remove("x");
+            board.classList.add(currTurn);
+        }
+    </script>
+    <a href="index.html" class="btn info">Back To Main Menu</a>
+</body>
+
+</html>
